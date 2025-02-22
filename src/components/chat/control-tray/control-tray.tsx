@@ -58,12 +58,7 @@ const MediaStreamButton = memo(
     )
 );
 
-function ControlTray({
-  videoRef,
-  children,
-  onVideoStreamChange = () => {},
-  supportsVideo,
-}: ControlTrayProps) {
+function ControlTray({ videoRef, children, onVideoStreamChange = () => { }, supportsVideo }: ControlTrayProps) {
   const videoStreams = [useWebcam(), useScreenCapture()];
   const [activeVideoStream, setActiveVideoStream] =
     useState<MediaStream | null>(null);
@@ -175,26 +170,28 @@ function ControlTray({
   };
 
   return (
-    <div className="flex items-center gap-4">
-      <canvas className="hidden" ref={renderCanvasRef} />
+    <div className="flex items-center justify-center w-full max-w-2xl mx-auto">
+      <div className="flex items-center gap-4">
+        {/* Left group - Audio controls */}
+        <div className="flex items-center gap-2 p-2 bg-muted/20 backdrop-blur rounded-2xl">
+          <Button
+            variant={!muted && connected ? "destructive" : "secondary"}
+            size="icon"
+            className="w-12 h-12"
+            disabled={!connected}
+            onClick={() => setMuted(!muted)}
+          >
+            {!muted && connected ? <FaMicrophone size={20} /> : <FaMicrophoneSlash size={20} />}
+          </Button>
 
-      <div className="flex-1 flex items-center gap-2 p-2 bg-muted/20 backdrop-blur rounded-2xl">
-        <Button
-          variant={!muted && connected ? "destructive" : "secondary"}
-          size="icon"
-          className="w-12 h-12"
-          disabled={!connected}
-          onClick={() => setMuted(!muted)}
-        >
-          {!muted && connected ? <FaMicrophone size={20} /> : <FaMicrophoneSlash size={20} />}
-        </Button>
-
-        <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-muted/20">
-          <AudioPulse volume={volume} active={connected} hover={false} />
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-muted/20">
+            <AudioPulse volume={volume} active={connected} hover={false} />
+          </div>
         </div>
 
+        {/* Center group - Video controls */}
         {supportsVideo && (
-          <>
+          <div className="flex items-center gap-2 p-2 bg-muted/20 backdrop-blur rounded-2xl">
             <MediaStreamButton
               isStreaming={screenCapture.isStreaming}
               start={changeStreams(screenCapture)}
@@ -211,20 +208,26 @@ function ControlTray({
               offIcon={<IoImageOutline size={20} />}
               disabled={!connected}
             />
-          </>
+          </div>
         )}
+
+        {/* Right group - Connection control */}
+        <div className="p-2 bg-muted/20 backdrop-blur rounded-2xl">
+          <Button
+            ref={connectButtonRef}
+            variant={connected ? "default" : "secondary"}
+            size="icon"
+            className="w-12 h-12"
+            onClick={connected ? disconnect : connect}
+          >
+            {connected ? <VscDebugPause size={20} /> : <VscDebugStart size={20} />}
+          </Button>
+        </div>
+
         {children}
       </div>
 
-      <Button
-        ref={connectButtonRef}
-        variant={connected ? "default" : "secondary"}
-        size="icon"
-        className="w-12 h-12"
-        onClick={connected ? disconnect : connect}
-      >
-        {connected ? <VscDebugPause size={20} /> : <VscDebugStart size={20} />}
-      </Button>
+      <canvas className="hidden" ref={renderCanvasRef} />
     </div>
   );
 }

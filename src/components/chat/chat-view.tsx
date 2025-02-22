@@ -7,12 +7,22 @@ import ControlTray from '@/components/chat/control-tray/control-tray';
 import { VisualizerPanel } from './visualizer-panel';
 import { useLiveAPIContext } from '@/contexts/LiveAPIContext';
 import { useLoggerStore } from '@/lib/store-logger';
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Send } from "lucide-react";
 
 export default function ChatView() {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
-    const { connected } = useLiveAPIContext();
+    const { connected, client } = useLiveAPIContext();
     const { logs } = useLoggerStore();
+    const [message, setMessage] = useState('');
+
+    const handleSend = () => {
+        if (!message.trim()) return;
+        client.send([{ text: message }]);
+        setMessage('');
+    };
 
     return (
         <div className="flex h-full w-full">
@@ -37,14 +47,44 @@ export default function ChatView() {
                     </div>
                 </div>
 
-                {/* Control Area */}
+                {/* Bottom Area */}
                 <div className="flex-none border-t border-border/50 backdrop-blur-md bg-background/95">
+                    {/* Control Tray */}
+                    <div className="border-b border-border/50">
+                        <div className="max-w-3xl mx-auto px-6 py-4 flex justify-center">
+                            <ControlTray
+                                videoRef={videoRef}
+                                supportsVideo={true}
+                                onVideoStreamChange={setVideoStream}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Chat Input */}
                     <div className="max-w-3xl mx-auto p-6">
-                        <ControlTray
-                            videoRef={videoRef}
-                            supportsVideo={true}
-                            onVideoStreamChange={setVideoStream}
-                        />
+                        <div className="relative">
+                            <Textarea
+                                value={message}
+                                onChange={(e) => setMessage(e.target.value)}
+                                placeholder="Type a message..."
+                                className="min-h-[100px] pr-12 resize-none bg-muted/20"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                        e.preventDefault();
+                                        handleSend();
+                                    }
+                                }}
+                                disabled={!connected}
+                            />
+                            <Button
+                                size="icon"
+                                className="absolute bottom-2 right-2"
+                                onClick={handleSend}
+                                disabled={!connected || !message.trim()}
+                            >
+                                <Send className="h-4 w-4" />
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </div>
