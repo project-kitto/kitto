@@ -4,7 +4,6 @@ import { ToolCall } from '@/config/chat/multimodal-live-types';
 import { useLiveAPIContext } from '@contexts/LiveAPIContext';
 import { type FunctionDeclaration, SchemaType } from '@google/generative-ai';
 import { memo, useEffect, useRef, useState } from 'react';
-import vegaEmbed from 'vega-embed';
 
 const declaration: FunctionDeclaration = {
   name: 'render_altair',
@@ -86,9 +85,16 @@ function AltairComponent() {
   const embedRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (embedRef.current && jsonString) {
-      vegaEmbed(embedRef.current, JSON.parse(jsonString));
-    }
+    const loadVegaEmbed = async () => {
+      if (embedRef.current && jsonString) {
+        (await import('vega-embed')).default(
+          embedRef.current,
+          JSON.parse(jsonString)
+        );
+      }
+    };
+
+    loadVegaEmbed();
   }, [embedRef, jsonString]);
   return <div className="vega-embed" ref={embedRef} />;
 }
