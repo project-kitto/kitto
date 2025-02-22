@@ -27,19 +27,21 @@ type MediaStreamButtonProps = {
   offIcon: ReactNode;
   start: () => Promise<any>;
   stop: () => any;
+  disabled?: boolean;
 };
 
 /**
  * button used for triggering webcam or screen-capture
  */
 const MediaStreamButton = memo(
-  ({ isStreaming, onIcon, offIcon, start, stop }: MediaStreamButtonProps) =>
+  ({ isStreaming, onIcon, offIcon, start, stop, disabled }: MediaStreamButtonProps) =>
     isStreaming ? (
       <Button
         variant="secondary"
         size="icon"
         className="w-12 h-12"
         onClick={stop}
+        disabled={disabled}
       >
         {onIcon}
       </Button>
@@ -49,6 +51,7 @@ const MediaStreamButton = memo(
           size="icon"
           className="w-12 h-12"
           onClick={start}
+          disabled={disabled}
         >
           {offIcon}
         </Button>
@@ -166,6 +169,7 @@ function ControlTray({
           variant={!muted ? "destructive" : "secondary"}
           size="icon"
           className="w-12 h-12"
+          disabled={!connected}
           onClick={() => setMuted(!muted)}
         >
           {!muted ? <FaMicrophone size={20} /> : <FaMicrophoneSlash size={20} />}
@@ -183,6 +187,7 @@ function ControlTray({
               stop={changeStreams()}
               onIcon={<MdOutlineScreenShare size={20} />}
               offIcon={<MdOutlineScreenShare size={20} />}
+              disabled={!connected}
             />
             <MediaStreamButton
               isStreaming={webcam.isStreaming}
@@ -190,6 +195,7 @@ function ControlTray({
               stop={changeStreams()}
               onIcon={<IoImageOutline size={20} />}
               offIcon={<IoImageOutline size={20} />}
+              disabled={!connected}
             />
           </>
         )}

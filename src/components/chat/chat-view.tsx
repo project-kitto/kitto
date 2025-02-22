@@ -9,6 +9,7 @@ import { VisualizerPanel } from './visualizer-panel';
 export default function ChatView() {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
+    const [connected, setConnected] = useState(false);
 
     return (
         <div className="flex h-full w-full">
@@ -17,7 +18,14 @@ export default function ChatView() {
                 {/* Messages Area */}
                 <div className="flex-1 overflow-y-auto px-6 py-8">
                     <div className="max-w-3xl mx-auto">
-                        <Logger filter="conversations" />
+                        {!connected ? (
+                            <div className="flex flex-col items-center justify-center h-full text-neutral-500">
+                                <p>Connect to start chatting</p>
+                                <p className="text-sm">Click the connect button to begin</p>
+                            </div>
+                        ) : (
+                                <Logger filter="conversations" />
+                        )}
                     </div>
                 </div>
 
