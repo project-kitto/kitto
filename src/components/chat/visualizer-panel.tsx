@@ -20,24 +20,35 @@ export function VisualizerPanel({ videoRef, videoStream }: VisualizerPanelProps)
             <div className="h-full flex flex-col gap-6 p-6 overflow-y-auto">
                 {/* Visualization */}
                 <div className="flex-1 bg-muted/20 rounded-2xl p-4 backdrop-blur ring-1 ring-border/10">
-                    <Altair />
+                    {!videoStream ? (
+                        <div className="h-full flex items-center justify-center text-muted-foreground">
+                            <p className="text-sm">No visualization data</p>
+                        </div>
+                    ) : (
+                            <Altair />
+                    )}
                 </div>
 
                 {/* Video */}
                 <AnimatePresence>
-                    {videoStream && (
+                    {videoStream ? (
+                        <motion.video
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 20 }}
+                            className="w-full aspect-video rounded-2xl bg-muted/20 object-cover ring-1 ring-border/10"
+                            ref={videoRef}
+                            autoPlay
+                            playsInline
+                        />
+                    ) : (
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: 20 }}
-                            className="aspect-video"
+                            className="aspect-video rounded-2xl bg-muted/20 flex items-center justify-center text-muted-foreground"
                         >
-                            <video
-                                className="w-full h-full rounded-2xl bg-muted/20 object-cover ring-1 ring-border/10"
-                                ref={videoRef}
-                                autoPlay
-                                playsInline
-                            />
+                            <p className="text-sm">No video input</p>
                         </motion.div>
                     )}
                 </AnimatePresence>

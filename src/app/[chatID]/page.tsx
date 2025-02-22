@@ -20,30 +20,38 @@ const uri = `wss://${host}/ws/google.ai.generativelanguage.v1alpha.GenerativeSer
 function App() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   return (
     <LiveAPIProvider url={uri} apiKey={API_KEY}>
       <div className="flex h-screen bg-neutral-950">
         {/* Left Sidebar */}
         <aside className="border-r border-neutral-800 bg-neutral-900 overflow-hidden">
-          <SidePanel />
+          <SidePanel
+            onCollapse={setSidebarCollapsed}
+            isCollapsed={sidebarCollapsed}
+          />
         </aside>
 
         {/* Main Content */}
         <main className="flex-1 flex bg-neutral-900">
           {/* Chat Area */}
           <div className="flex-1 flex flex-col min-w-0">
-            <div className="flex-1 overflow-y-auto px-6 py-8">
-              <Logger filter="conversations" />
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="max-w-3xl mx-auto">
+                <Logger filter="conversations" />
+              </div>
             </div>
 
-            {/* Control Tray */}
-            <div className="border-t border-neutral-800 bg-neutral-900/80 backdrop-blur p-6">
-              <ControlTray
-                videoRef={videoRef}
-                supportsVideo={true}
-                onVideoStreamChange={setVideoStream}
-              />
+            {/* Control Tray - Fixed at bottom */}
+            <div className="flex-none border-t border-neutral-800 bg-neutral-900/80 backdrop-blur p-6">
+              <div className="max-w-3xl mx-auto">
+                <ControlTray
+                  videoRef={videoRef}
+                  supportsVideo={true}
+                  onVideoStreamChange={setVideoStream}
+                />
+              </div>
             </div>
           </div>
 
