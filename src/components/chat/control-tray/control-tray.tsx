@@ -12,6 +12,7 @@ import { IoImageOutline } from "react-icons/io5";
 import { MdOutlineScreenShare } from "react-icons/md";
 import { FaMicrophone, FaMicrophoneSlash } from "react-icons/fa";
 import { VscDebugStart, VscDebugPause } from "react-icons/vsc";
+import { Button } from "@/components/ui/button";
 
 export type ControlTrayProps = {
   videoRef: RefObject<HTMLVideoElement | null>;
@@ -34,19 +35,23 @@ type MediaStreamButtonProps = {
 const MediaStreamButton = memo(
   ({ isStreaming, onIcon, offIcon, start, stop }: MediaStreamButtonProps) =>
     isStreaming ? (
-      <button
-        className="flex items-center justify-center w-12 h-12 rounded-xl bg-neutral-800 text-neutral-400 hover:bg-neutral-700 transition-colors"
+      <Button
+        variant="secondary"
+        size="icon"
+        className="w-12 h-12"
         onClick={stop}
       >
         {onIcon}
-      </button>
+      </Button>
     ) : (
-        <button
-          className="flex items-center justify-center w-12 h-12 rounded-xl bg-neutral-800 text-neutral-400 hover:bg-neutral-700 transition-colors"
+        <Button
+          variant="secondary"
+          size="icon"
+          className="w-12 h-12"
           onClick={start}
         >
           {offIcon}
-      </button>
+        </Button>
     )
 );
 
@@ -157,15 +162,14 @@ function ControlTray({
       <canvas className="hidden" ref={renderCanvasRef} />
 
       <div className="flex items-center gap-2 p-2 bg-neutral-800/50 rounded-2xl">
-        <button
-          className={cn(
-            "w-12 h-12 rounded-xl flex items-center justify-center transition-colors",
-            !muted ? "bg-red-500 text-white" : "bg-neutral-700 text-neutral-400"
-          )}
+        <Button
+          variant={!muted ? "destructive" : "secondary"}
+          size="icon"
+          className="w-12 h-12"
           onClick={() => setMuted(!muted)}
         >
           {!muted ? <FaMicrophone size={20} /> : <FaMicrophoneSlash size={20} />}
-        </button>
+        </Button>
 
         <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-neutral-800">
           <AudioPulse volume={volume} active={connected} hover={false} />
@@ -193,18 +197,15 @@ function ControlTray({
       </div>
 
       <div className="flex flex-col items-center gap-1">
-        <button
+        <Button
           ref={connectButtonRef}
+          variant={connected ? "default" : "secondary"}
+          size="icon"
+          className="w-12 h-12"
           onClick={connected ? disconnect : connect}
-          className={cn(
-            "w-12 h-12 rounded-xl flex items-center justify-center",
-            connected
-              ? "bg-blue-500 text-white"
-              : "bg-neutral-700 text-neutral-400"
-          )}
         >
           {connected ? <VscDebugPause size={20} /> : <VscDebugStart size={20} />}
-        </button>
+        </Button>
         <span className="text-xs text-neutral-400">
           {connected ? "Connected" : "Connect"}
         </span>

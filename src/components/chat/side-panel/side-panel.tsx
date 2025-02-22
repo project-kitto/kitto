@@ -1,23 +1,28 @@
 'use client';
 
+import { Button } from "@/components/ui/button";
 import Logger, { LoggerFilterType } from '@/components/chat/logger/logger';
 import { cn } from '@/lib/utils';
+import { filterOptions } from '@/lib/constants';
 import { useLiveAPIContext } from '@contexts/LiveAPIContext';
 import { useLoggerStore } from '@lib/store-logger';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, Dispatch, SetStateAction } from 'react';
 import { RiSidebarFoldLine, RiSidebarUnfoldLine } from 'react-icons/ri';
 import Select from 'react-select';
 import { HiOutlineClipboardDocumentList } from "react-icons/hi2";
 import { IoSettingsOutline } from "react-icons/io5";
 import { MdOutlineHistory } from "react-icons/md";
 
-const filterOptions = [
-  { value: 'conversations', label: 'Conversations' },
-  { value: 'tools', label: 'Tool Use' },
-  { value: 'none', label: 'All' },
-];
+interface SidePanelProps {
+  onCollapse: (collapsed: boolean) => void;
+}
 
-export default function SidePanel() {
+// Move formatTime to a utils file to avoid hydration issues
+const formatTime = (date: Date) => {
+  return date.toISOString().slice(11, 16); // Use ISO format instead of locale-specific
+};
+
+export default function SidePanel({ onCollapse }: SidePanelProps) {
   const { connected, client } = useLiveAPIContext();
   const [open, setOpen] = useState(true);
   const loggerRef = useRef<HTMLDivElement>(null);
@@ -60,20 +65,32 @@ export default function SidePanel() {
     }
   };
 
+  const handleToggle = () => {
+    const newState = !open;
+    setOpen(newState);
+    if (onCollapse && typeof onCollapse === 'function') {
+      onCollapse(!open);
+    }
+  };
+
   return (
     <div className="flex h-full transition-all duration-300">
       {/* Navigation Bar */}
       <nav className="w-20 border-r border-neutral-800 bg-neutral-900/50 flex flex-col py-6">
         <div className="flex flex-col items-center gap-4">
-          <button className="p-3 rounded-xl bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="p-3 rounded-xl bg-blue-500/10 text-blue-400 hover:bg-blue-500/20"
+          >
             <HiOutlineClipboardDocumentList size={24} />
-          </button>
-          <button className="p-3 rounded-xl hover:bg-neutral-800/50 text-neutral-400 transition-colors">
+          </Button>
+          <Button variant="ghost" size="icon" className="p-3">
             <MdOutlineHistory size={24} />
-          </button>
-          <button className="p-3 rounded-xl hover:bg-neutral-800/50 text-neutral-400 transition-colors">
+          </Button>
+          <Button variant="ghost" size="icon" className="p-3">
             <IoSettingsOutline size={24} />
-          </button>
+          </Button>
         </div>
       </nav>
 
@@ -85,12 +102,14 @@ export default function SidePanel() {
         {/* Header */}
         <header className="flex items-center justify-between p-6 border-b border-neutral-800">
           <h2 className="text-xl font-medium text-neutral-100">Console</h2>
-          <button
-            className="p-2 hover:bg-neutral-800 rounded-lg transition-colors text-neutral-400"
-            onClick={() => setOpen(!open)}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="p-2"
+            onClick={handleToggle}
           >
             {open ? <RiSidebarFoldLine size={20} /> : <RiSidebarUnfoldLine size={20} />}
-          </button>
+          </Button>
         </header>
 
         {/* Filter and Status */}
