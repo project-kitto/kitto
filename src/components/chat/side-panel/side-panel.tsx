@@ -77,17 +77,8 @@ export default function SidePanel({ onCollapse, isCollapsed }: SidePanelProps) {
     <div className="flex h-full">
       {/* Navigation Bar */}
       <nav className="w-20 shrink-0 border-r border-neutral-800 bg-neutral-900/50 flex flex-col py-6">
-        <div className="flex flex-col items-center gap-4">
-          {isCollapsed && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="p-3"
-              onClick={handleToggle}
-            >
-              <RiSidebarUnfoldLine size={24} />
-            </Button>
-          )}
+        {/* Top buttons */}
+        <div className="flex-1 flex flex-col items-center gap-4">
           <Button
             variant="ghost"
             size="icon"
@@ -103,6 +94,18 @@ export default function SidePanel({ onCollapse, isCollapsed }: SidePanelProps) {
             <IoSettingsOutline size={24} />
           </Button>
         </div>
+
+        {/* Collapse button - Always at bottom */}
+        <div className="flex-none flex justify-center pb-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="p-3 hover:bg-muted/20"
+            onClick={handleToggle}
+          >
+            {isCollapsed ? <RiSidebarUnfoldLine size={24} /> : <RiSidebarFoldLine size={24} />}
+          </Button>
+        </div>
       </nav>
 
       {/* Main Panel */}
@@ -116,23 +119,23 @@ export default function SidePanel({ onCollapse, isCollapsed }: SidePanelProps) {
           "w-[380px] flex flex-col h-full transition-opacity duration-300",
           isCollapsed ? "opacity-0 invisible" : "opacity-100 visible"
         )}>
-          {/* Header */}
-          <header className="flex-none flex items-center justify-between p-6 border-b border-neutral-800">
+          {/* Header with padding */}
+          <header className="flex-none flex items-center justify-between px-8 pr-10 py-4 border-b border-neutral-800">
             <h2 className="text-xl font-medium text-neutral-100">Settings</h2>
             <Button
               variant="ghost"
               size="icon"
-              className="p-2"
+              className="p-4"
               onClick={handleToggle}
             >
               {!isCollapsed ? <RiSidebarFoldLine size={20} /> : <RiSidebarUnfoldLine size={20} />}
             </Button>
           </header>
 
-          {/* Content Area */}
+          {/* Content Area with consistent padding */}
           <div className="flex-1 overflow-hidden flex flex-col">
-            {/* Model Selection */}
-            <div className="flex-none p-6 border-b border-neutral-800 space-y-4">
+            {/* Model Selection with padding */}
+            <div className="flex-none px-6 pr-14 py-4 border-b border-neutral-800 space-y-4">
               <label className="text-sm font-medium text-neutral-400">Model</label>
               <Select
                 className="flex-1"
@@ -173,7 +176,7 @@ export default function SidePanel({ onCollapse, isCollapsed }: SidePanelProps) {
               </div>
             </div>
 
-            {/* Logger */}
+            {/* Logger with padding */}
             <div className="flex-1 overflow-y-auto p-6" ref={loggerRef}>
               {logs.length === 0 ? (
                 <div className="flex items-center justify-center h-full text-muted-foreground">

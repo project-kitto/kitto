@@ -27,31 +27,27 @@ export default function ChatView() {
     return (
         <div className="flex h-full w-full">
             <div className="flex-1 flex flex-col h-full min-w-0">
-                {/* Messages Area */}
-                <div className="flex-1 overflow-y-auto px-6 py-8">
-                    <div className="max-w-3xl mx-auto min-h-full relative">
+                {/* Messages Area - Reduce bottom padding to make room for controls */}
+                <div className="flex-1 overflow-y-auto px-6 pb-4">
+                    <div className="max-w-3xl mx-auto">
                         {!connected ? (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="flex flex-col items-center gap-3 text-muted-foreground">
+                            <div className="h-full flex items-center justify-center text-muted-foreground">
+                                <div className="flex flex-col items-center gap-3">
                                     <div className="w-3 h-3 bg-red-500/50 rounded-full animate-pulse" />
-                                    <p className="text-sm font-medium">Disconnected</p>
+                                    <p className="text-sm">Disconnected</p>
                                 </div>
                             </div>
-                        ) : logs.length === 0 ? (
-                            <div className="flex items-center justify-center h-full text-muted-foreground">
-                                <p>Start a conversation</p>
-                            </div>
                         ) : (
-                                    <Logger filter="conversations" />
+                                <Logger filter="conversations" />
                         )}
                     </div>
                 </div>
 
-                {/* Bottom Area */}
-                <div className="flex-none border-t border-border/50 backdrop-blur-md bg-background/95">
+                {/* Fixed Bottom Section */}
+                <div className="flex-none border-t border-border/50 bg-background/95 backdrop-blur-md">
                     {/* Control Tray */}
-                    <div className="border-b border-border/50">
-                        <div className="max-w-3xl mx-auto px-6 py-4 flex justify-center">
+                    <div className="border-b border-border/50 py-4">
+                        <div className="max-w-3xl mx-auto px-6">
                             <ControlTray
                                 videoRef={videoRef}
                                 supportsVideo={true}
@@ -61,34 +57,37 @@ export default function ChatView() {
                     </div>
 
                     {/* Chat Input */}
-                    <div className="max-w-3xl mx-auto p-6">
-                        <div className="relative">
-                            <Textarea
-                                value={message}
-                                onChange={(e) => setMessage(e.target.value)}
-                                placeholder="Type a message..."
-                                className="min-h-[100px] pr-12 resize-none bg-muted/20"
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter' && !e.shiftKey) {
-                                        e.preventDefault();
-                                        handleSend();
-                                    }
-                                }}
-                                disabled={!connected}
-                            />
-                            <Button
-                                size="icon"
-                                className="absolute bottom-2 right-2"
-                                onClick={handleSend}
-                                disabled={!connected || !message.trim()}
-                            >
-                                <Send className="h-4 w-4" />
-                            </Button>
+                    <div className="py-4">
+                        <div className="max-w-3xl mx-auto px-6">
+                            <div className="relative">
+                                <Textarea
+                                    value={message}
+                                    onChange={(e) => setMessage(e.target.value)}
+                                    placeholder="Type a message..."
+                                    className="min-h-[120px] w-full resize-none bg-muted/20 pr-12 rounded-xl focus:ring-1 ring-blue-500/50"
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && !e.shiftKey) {
+                                            e.preventDefault();
+                                            handleSend();
+                                        }
+                                    }}
+                                    disabled={!connected}
+                                />
+                                <Button
+                                    size="icon"
+                                    className="absolute bottom-3 right-3 h-9 w-9"
+                                    onClick={handleSend}
+                                    disabled={!connected || !message.trim()}
+                                >
+                                    <Send className="h-4 w-4" />
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
+            {/* Visualizer Panel */}
             <VisualizerPanel videoRef={videoRef} videoStream={videoStream} />
         </div>
     );
