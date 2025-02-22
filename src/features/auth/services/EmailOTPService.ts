@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export class EmailOTPServices implements AuthServiceInterface {
   public static instance: EmailOTPServices;
 
-  private constructor() {}
+  private constructor() { }
 
   public static getInstance(): EmailOTPServices {
     if (!EmailOTPServices.instance) {
@@ -72,6 +72,23 @@ export class EmailOTPServices implements AuthServiceInterface {
     await supabase.auth.signOut();
     return NextResponse.json(
       { message: 'Signed out successfully' },
+      { status: ResponseCode.SUCCESS }
+    );
+  }
+
+  async isUserAuthenticated(res: NextResponse) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'User not authenticated' },
+        { status: ResponseCode.UNAUTHORIZED }
+      );
+    }
+
+    return NextResponse.json(
+      { message: 'User is authenticated', user },
       { status: ResponseCode.SUCCESS }
     );
   }

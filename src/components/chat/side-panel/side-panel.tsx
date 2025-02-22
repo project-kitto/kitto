@@ -1,22 +1,31 @@
 'use client';
 
+import { Button } from "@/components/ui/button";
 import Logger, { LoggerFilterType } from '@/components/chat/logger/logger';
 import { cn } from '@/lib/utils';
+import { modelOptions } from '@/lib/constants';
 import { useLiveAPIContext } from '@contexts/LiveAPIContext';
 import { useLoggerStore } from '@lib/store-logger';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { RiSidebarFoldLine, RiSidebarUnfoldLine } from 'react-icons/ri';
 import Select from 'react-select';
+import { HiOutlineClipboardDocumentList } from "react-icons/hi2";
+import { IoSettingsOutline } from "react-icons/io5";
+import { MdOutlineHistory } from "react-icons/md";
+import { Send } from "lucide-react";
 
-const filterOptions = [
-  { value: 'conversations', label: 'Conversations' },
-  { value: 'tools', label: 'Tool Use' },
-  { value: 'none', label: 'All' },
-];
+interface SidePanelProps {
+  onCollapse: (collapsed: boolean) => void;
+  isCollapsed: boolean;
+}
 
-export default function SidePanel() {
+// Move formatTime to a utils file to avoid hydration issues
+const formatTime = (date: Date) => {
+  return date.toISOString().slice(11, 16); // Use ISO format instead of locale-specific
+};
+
+export default function SidePanel({ onCollapse, isCollapsed }: SidePanelProps) {
   const { connected, client } = useLiveAPIContext();
-  const [open, setOpen] = useState(true);
   const loggerRef = useRef<HTMLDivElement>(null);
   const loggerLastHeightRef = useRef<number>(-1);
   const { log, logs } = useLoggerStore();
@@ -26,6 +35,7 @@ export default function SidePanel() {
     value: string;
     label: string;
   } | null>(null);
+  const [selectedModel, setSelectedModel] = useState(modelOptions[0]);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   //scroll the log to the bottom when new logs come in
@@ -57,88 +67,126 @@ export default function SidePanel() {
     }
   };
 
-  return (
-    <div className={`side-panel ${open ? 'open' : ''}`}>
-      <header className="top">
-        <h2>Console</h2>
-        {open ? (
-          <button className="opener" onClick={() => setOpen(false)}>
-            <RiSidebarFoldLine color="#b4b8bb" />
-          </button>
-        ) : (
-          <button className="opener" onClick={() => setOpen(true)}>
-            <RiSidebarUnfoldLine color="#b4b8bb" />
-          </button>
-        )}
-      </header>
-      <section className="indicators">
-        <Select
-          className="react-select"
-          classNamePrefix="react-select"
-          styles={{
-            control: (baseStyles) => ({
-              ...baseStyles,
-              background: 'var(--Neutral-15)',
-              color: 'var(--Neutral-90)',
-              minHeight: '33px',
-              maxHeight: '33px',
-              border: 0,
-            }),
-            option: (styles, { isFocused, isSelected }) => ({
-              ...styles,
-              backgroundColor: isFocused
-                ? 'var(--Neutral-30)'
-                : isSelected
-                  ? 'var(--Neutral-20)'
-                  : undefined,
-            }),
-          }}
-          defaultValue={selectedOption}
-          options={filterOptions}
-          onChange={(e) => {
-            setSelectedOption(e);
-          }}
-        />
-        <div className={cn('streaming-indicator', { connected })}>
-          {connected
-            ? `🔵${open ? ' Streaming' : ''}`
-            : `⏸️${open ? ' Paused' : ''}`}
-        </div>
-      </section>
-      <div className="side-panel-container" ref={loggerRef}>
-        <Logger
-          filter={(selectedOption?.value as LoggerFilterType) || 'none'}
-        />
-      </div>
-      <div className={cn('input-container', { disabled: !connected })}>
-        <div className="input-content">
-          <textarea
-            className="input-area"
-            ref={inputRef}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                e.stopPropagation();
-                handleSubmit();
-              }
-            }}
-            onChange={(e) => setTextInput(e.target.value)}
-            value={textInput}
-          ></textarea>
-          <span
-            className={cn('input-content-placeholder', {
-              hidden: textInput.length,
-            })}
-          >
-            Type&nbsp;something...
-          </span>
+  const handleToggle = useCallback(() => {
+    if (typeof onCollapse === 'function') {
+      onCollapse(!isCollapsed);
+    }
+  }, [onCollapse, isCollapsed]);
 
-          <button
-            className="send-button material-symbols-outlined filled"
-            onClick={handleSubmit}
+  return (
+    <div className="flex h-full">
+      {/* Navigation Bar */}
+      <nav className="w-20 shrink-0 border-r border-neutral-800 bg-neutral-900/50 flex flex-col py-6">
+        {/* Top buttons */}
+        <div className="flex-1 flex flex-col items-center gap-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="p-3 rounded-xl bg-blue-500/10 text-blue-400 hover:bg-blue-500/20"
+            disabled={!connected}
           >
-            send
-          </button>
+            <HiOutlineClipboardDocumentList size={24} />
+          </Button>
+          <Button variant="ghost" size="icon" className="p-3" disabled={!connected}>
+            <MdOutlineHistory size={24} />
+          </Button>
+          <Button variant="ghost" size="icon" className="p-3" disabled={!connected}>
+            <IoSettingsOutline size={24} />
+          </Button>
+        </div>
+
+        {/* Collapse button - Always at bottom */}
+        <div className="flex-none flex justify-center pb-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="p-3 hover:bg-muted/20"
+            onClick={handleToggle}
+          >
+            {isCollapsed ? <RiSidebarUnfoldLine size={24} /> : <RiSidebarFoldLine size={24} />}
+          </Button>
+        </div>
+      </nav>
+
+      {/* Main Panel */}
+      <div
+        className={cn(
+          "flex flex-col bg-neutral-900 overflow-hidden transition-all duration-300 ease-in-out",
+          isCollapsed ? "w-0" : "w-[380px]"
+        )}
+      >
+        <div className={cn(
+          "w-[380px] flex flex-col h-full transition-opacity duration-300",
+          isCollapsed ? "opacity-0 invisible" : "opacity-100 visible"
+        )}>
+          {/* Header with padding */}
+          <header className="flex-none flex items-center justify-between px-8 pr-10 py-4 border-b border-neutral-800">
+            <h2 className="text-xl font-medium text-neutral-100">Settings</h2>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="p-4"
+              onClick={handleToggle}
+            >
+              {!isCollapsed ? <RiSidebarFoldLine size={20} /> : <RiSidebarUnfoldLine size={20} />}
+            </Button>
+          </header>
+
+          {/* Content Area with consistent padding */}
+          <div className="flex-1 overflow-hidden flex flex-col">
+            {/* Model Selection with padding */}
+            <div className="flex-none px-6 pr-14 py-4 border-b border-neutral-800 space-y-4">
+              <label className="text-sm font-medium text-neutral-400">Model</label>
+              <Select
+                className="flex-1"
+                value={selectedModel}
+                options={modelOptions}
+                onChange={(option) => setSelectedModel(option!)}
+                isDisabled={!connected}
+                styles={{
+                  control: (base) => ({
+                    ...base,
+                    background: 'rgb(23 23 23)',
+                    borderColor: 'rgb(38 38 38)',
+                    minHeight: '40px',
+                  }),
+                  menu: (base) => ({
+                    ...base,
+                    background: 'rgb(23 23 23)',
+                    borderColor: 'rgb(38 38 38)',
+                  }),
+                  option: (base, { isFocused, isSelected }) => ({
+                    ...base,
+                    backgroundColor: isFocused
+                      ? 'rgb(38 38 38)'
+                      : isSelected
+                        ? 'rgb(64 64 64)'
+                        : undefined,
+                    color: 'rgb(229 229 229)',
+                  }),
+                }}
+              />
+              <div className={cn(
+                "px-4 py-2 rounded-lg border text-sm whitespace-nowrap",
+                connected
+                  ? "border-blue-900/50 bg-blue-950/20 text-blue-400"
+                  : "border-neutral-800 bg-neutral-900 text-neutral-400"
+              )}>
+                {connected ? '🟢 Connected' : '⚫ Disconnected'}
+              </div>
+            </div>
+
+            {/* Logger with padding */}
+            <div className="flex-1 overflow-y-auto p-6" ref={loggerRef}>
+              {logs.length === 0 ? (
+                <div className="flex items-center justify-center h-full text-muted-foreground">
+                  <p>No transcripts yet</p>
+                </div>
+              ) : (
+                <Logger filter="none" />
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -37,20 +37,24 @@ const LogEntry = ({
 }): React.JSX.Element => (
   <li
     className={cn(
-      `plain-log`,
+      "flex items-start gap-3 py-3 text-sm font-mono",
       `source-${log.type.slice(0, log.type.indexOf('.'))}`,
       {
-        receive: log.type.includes('receive'),
-        send: log.type.includes('send'),
+        'text-blue-400': log.type.includes('receive'),
+        'text-emerald-400': log.type.includes('send'),
       }
     )}
   >
-    <span className="timestamp">{formatTime(log.date)}</span>
-    <span className="source">{log.type}</span>
-    <span className="message">
+    <span className="text-neutral-500 shrink-0">{formatTime(log.date)}</span>
+    <span className="text-neutral-400 shrink-0">{log.type}</span>
+    <span className="text-neutral-300 break-all">
       <MessageComponent message={log.message} />
     </span>
-    {log.count && <span className="count">{log.count}</span>}
+    {log.count && (
+      <span className="px-2 py-0.5 bg-neutral-800 rounded text-xs text-neutral-400">
+        {log.count}
+      </span>
+    )}
   </li>
 );
 

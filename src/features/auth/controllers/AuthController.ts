@@ -56,6 +56,17 @@ export default class AuthController {
     }
   }
 
+  async isUserAuthenticated(res: NextResponse) {
+    try {
+      return await this.authService.isUserAuthenticated(res);
+    } catch (error: any) {
+      return NextResponse.json(
+        { error: error.message || 'Internal Server Error' },
+        { status: ResponseCode.INTERNAL_SERVER_ERROR }
+      );
+    }
+  }
+
   public setAuthService(authService: AuthServiceInterface): AuthController {
     this.authService = authService;
     return this;

@@ -1,18 +1,21 @@
 import type { StreamingLog } from '@config/chat/multimodal-live-types';
 
+// Use a fixed date for mock data to avoid hydration issues
+const MOCK_DATE = new Date('2024-01-01T00:00:00Z');
+
 const soundLogs = (n: number): StreamingLog[] =>
   new Array(n).fill(0).map(
     (): StreamingLog => ({
-      date: new Date(),
+      date: MOCK_DATE,
       type: 'server.audio',
       message: 'buffer (11250)',
     })
   );
-//
+
 const realtimeLogs = (n: number): StreamingLog[] =>
   new Array(n).fill(0).map(
     (): StreamingLog => ({
-      date: new Date(),
+      date: MOCK_DATE,
       type: 'client.realtimeInput',
       message: 'audio',
     })
@@ -20,14 +23,14 @@ const realtimeLogs = (n: number): StreamingLog[] =>
 
 export const mockLogs: StreamingLog[] = [
   {
-    date: new Date(),
+    date: MOCK_DATE,
     type: 'client.open',
     message: 'connected to socket',
   },
   ...realtimeLogs(10),
   ...soundLogs(10),
   {
-    date: new Date(),
+    date: MOCK_DATE,
     type: 'receive.content',
     message: {
       serverContent: {
@@ -36,7 +39,7 @@ export const mockLogs: StreamingLog[] = [
     },
   },
   {
-    date: new Date(),
+    date: MOCK_DATE,
     type: 'receive.content',
     message: {
       serverContent: {
@@ -46,7 +49,7 @@ export const mockLogs: StreamingLog[] = [
   },
   //this one is just a string
   // {
-  //   date: new Date(),
+  //   date: MOCK_DATE,
   //   type: "server.send",
   //   message: {
   //     serverContent: {
@@ -57,7 +60,7 @@ export const mockLogs: StreamingLog[] = [
   ...realtimeLogs(10),
   ...soundLogs(20),
   {
-    date: new Date(),
+    date: MOCK_DATE,
     type: 'receive.content',
     message: {
       serverContent: {
@@ -68,7 +71,7 @@ export const mockLogs: StreamingLog[] = [
     },
   },
   {
-    date: new Date(),
+    date: MOCK_DATE,
     type: 'client.send',
     message: {
       clientContent: {
@@ -87,7 +90,7 @@ export const mockLogs: StreamingLog[] = [
     },
   },
   {
-    date: new Date(),
+    date: MOCK_DATE,
     type: 'server.toolCall',
     message: {
       toolCall: {
@@ -107,7 +110,7 @@ export const mockLogs: StreamingLog[] = [
     },
   },
   {
-    date: new Date(),
+    date: MOCK_DATE,
     type: 'server.toolCallCancellation',
     message: {
       toolCallCancellation: {
@@ -116,7 +119,7 @@ export const mockLogs: StreamingLog[] = [
     },
   },
   {
-    date: new Date(),
+    date: MOCK_DATE,
     type: 'client.toolResponse',
     message: {
       toolResponse: {
