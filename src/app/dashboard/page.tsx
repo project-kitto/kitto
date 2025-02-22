@@ -1,5 +1,4 @@
 import LogoutButton from './logout-button';
-import { createClient } from '@/config/supabase/server';
 import { redirect } from 'next/navigation';
 import { checkAuthentication } from '@/utils/authUtil';
 export default async function HomePage() {
