@@ -5,4 +5,5 @@ export default interface AuthServiceInterface {
   signOut: (res: NextResponse) => Promise<NextResponse>;
   signUp: (req: NextRequest, res: NextResponse) => Promise<NextResponse>;
   verifyOTP: (req: NextRequest, res: NextResponse) => Promise<NextResponse>;
+  isUserAuthenticated: (res: NextResponse) => Promise<NextResponse>;
 }
