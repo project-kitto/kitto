@@ -2,6 +2,7 @@
 
 import { Altair } from '@/components/chat/altair/component';
 import ControlTray from '@/components/chat/control-tray/control-tray';
+import Logger from '@/components/chat/logger/logger';
 import SidePanel from '@/components/chat/side-panel/side-panel';
 import { cn } from '@/lib/utils';
 import { LiveAPIProvider } from '@contexts/LiveAPIContext';
@@ -17,42 +18,58 @@ const host = 'generativelanguage.googleapis.com';
 const uri = `wss://${host}/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent`;
 
 function App() {
-  // this video reference is used for displaying the active stream, whether that is the webcam or screen capture
-  // feel free to style as you see fit
   const videoRef = useRef<HTMLVideoElement>(null);
-  // either the screen capture, the video or null, if null we hide it
   const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
 
   return (
-    <div className="App">
-      <LiveAPIProvider url={uri} apiKey={API_KEY}>
-        <div className="streaming-console">
+    <LiveAPIProvider url={uri} apiKey={API_KEY}>
+      <div className="flex h-screen bg-neutral-950">
+        {/* Left Sidebar */}
+        <aside className="border-r border-neutral-800 bg-neutral-900 overflow-hidden">
           <SidePanel />
-          <main>
-            <div className="main-app-area">
-              {/* APP goes here */}
-              <Altair />
+        </aside>
+
+        {/* Main Content */}
+        <main className="flex-1 flex bg-neutral-900">
+          {/* Chat Area */}
+          <div className="flex-1 flex flex-col min-w-0">
+            <div className="flex-1 overflow-y-auto px-6 py-8">
+              <Logger filter="conversations" />
+            </div>
+
+            {/* Control Tray */}
+            <div className="border-t border-neutral-800 bg-neutral-900/80 backdrop-blur p-6">
+              <ControlTray
+                videoRef={videoRef}
+                supportsVideo={true}
+                onVideoStreamChange={setVideoStream}
+              />
+            </div>
+          </div>
+
+          {/* Right Panel - Visualization & Video */}
+          <div className="w-[480px] border-l border-neutral-800 flex flex-col">
+            <div className="flex-1 p-6 space-y-6">
+              {/* Visualization */}
+              <div className="flex-1 bg-neutral-800/50 rounded-2xl p-4">
+                <Altair />
+              </div>
+
+              {/* Video */}
               <video
-                className={cn('stream', {
-                  hidden: !videoRef.current || !videoStream,
-                })}
+                className={cn(
+                  "w-full aspect-video rounded-2xl bg-neutral-800/50 object-cover",
+                  !videoStream && "hidden"
+                )}
                 ref={videoRef}
                 autoPlay
                 playsInline
               />
             </div>
-
-            <ControlTray
-              videoRef={videoRef}
-              supportsVideo={true}
-              onVideoStreamChange={setVideoStream}
-            >
-              {/* put your own buttons here */}
-            </ControlTray>
-          </main>
-        </div>
-      </LiveAPIProvider>
-    </div>
+          </div>
+        </main>
+      </div>
+    </LiveAPIProvider>
   );
 }
 

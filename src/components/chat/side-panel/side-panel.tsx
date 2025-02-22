@@ -7,6 +7,9 @@ import { useLoggerStore } from '@lib/store-logger';
 import { useEffect, useRef, useState } from 'react';
 import { RiSidebarFoldLine, RiSidebarUnfoldLine } from 'react-icons/ri';
 import Select from 'react-select';
+import { HiOutlineClipboardDocumentList } from "react-icons/hi2";
+import { IoSettingsOutline } from "react-icons/io5";
+import { MdOutlineHistory } from "react-icons/md";
 
 const filterOptions = [
   { value: 'conversations', label: 'Conversations' },
@@ -58,87 +61,109 @@ export default function SidePanel() {
   };
 
   return (
-    <div className={`side-panel ${open ? 'open' : ''}`}>
-      <header className="top">
-        <h2>Console</h2>
-        {open ? (
-          <button className="opener" onClick={() => setOpen(false)}>
-            <RiSidebarFoldLine color="#b4b8bb" />
+    <div className="flex h-full transition-all duration-300">
+      {/* Navigation Bar */}
+      <nav className="w-20 border-r border-neutral-800 bg-neutral-900/50 flex flex-col py-6">
+        <div className="flex flex-col items-center gap-4">
+          <button className="p-3 rounded-xl bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors">
+            <HiOutlineClipboardDocumentList size={24} />
           </button>
-        ) : (
-          <button className="opener" onClick={() => setOpen(true)}>
-            <RiSidebarUnfoldLine color="#b4b8bb" />
+          <button className="p-3 rounded-xl hover:bg-neutral-800/50 text-neutral-400 transition-colors">
+            <MdOutlineHistory size={24} />
           </button>
-        )}
-      </header>
-      <section className="indicators">
-        <Select
-          className="react-select"
-          classNamePrefix="react-select"
-          styles={{
-            control: (baseStyles) => ({
-              ...baseStyles,
-              background: 'var(--Neutral-15)',
-              color: 'var(--Neutral-90)',
-              minHeight: '33px',
-              maxHeight: '33px',
-              border: 0,
-            }),
-            option: (styles, { isFocused, isSelected }) => ({
-              ...styles,
-              backgroundColor: isFocused
-                ? 'var(--Neutral-30)'
-                : isSelected
-                  ? 'var(--Neutral-20)'
-                  : undefined,
-            }),
-          }}
-          defaultValue={selectedOption}
-          options={filterOptions}
-          onChange={(e) => {
-            setSelectedOption(e);
-          }}
-        />
-        <div className={cn('streaming-indicator', { connected })}>
-          {connected
-            ? `🔵${open ? ' Streaming' : ''}`
-            : `⏸️${open ? ' Paused' : ''}`}
+          <button className="p-3 rounded-xl hover:bg-neutral-800/50 text-neutral-400 transition-colors">
+            <IoSettingsOutline size={24} />
+          </button>
         </div>
-      </section>
-      <div className="side-panel-container" ref={loggerRef}>
-        <Logger
-          filter={(selectedOption?.value as LoggerFilterType) || 'none'}
-        />
-      </div>
-      <div className={cn('input-container', { disabled: !connected })}>
-        <div className="input-content">
-          <textarea
-            className="input-area"
-            ref={inputRef}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                e.stopPropagation();
-                handleSubmit();
-              }
-            }}
-            onChange={(e) => setTextInput(e.target.value)}
-            value={textInput}
-          ></textarea>
-          <span
-            className={cn('input-content-placeholder', {
-              hidden: textInput.length,
-            })}
-          >
-            Type&nbsp;something...
-          </span>
+      </nav>
 
+      {/* Main Panel */}
+      <div className={cn(
+        "w-[380px] flex flex-col bg-neutral-900 transition-all duration-300",
+        open ? "translate-x-0" : "-translate-x-full"
+      )}>
+        {/* Header */}
+        <header className="flex items-center justify-between p-6 border-b border-neutral-800">
+          <h2 className="text-xl font-medium text-neutral-100">Console</h2>
           <button
-            className="send-button material-symbols-outlined filled"
-            onClick={handleSubmit}
+            className="p-2 hover:bg-neutral-800 rounded-lg transition-colors text-neutral-400"
+            onClick={() => setOpen(!open)}
           >
-            send
+            {open ? <RiSidebarFoldLine size={20} /> : <RiSidebarUnfoldLine size={20} />}
           </button>
+        </header>
+
+        {/* Filter and Status */}
+        <div className="flex items-center gap-4 p-6 border-b border-neutral-800">
+          <Select
+            className="flex-1"
+            defaultValue={selectedOption}
+            options={filterOptions}
+            onChange={setSelectedOption}
+            styles={{
+              control: (base) => ({
+                ...base,
+                background: 'rgb(23 23 23)',
+                borderColor: 'rgb(38 38 38)',
+                minHeight: '40px',
+              }),
+              menu: (base) => ({
+                ...base,
+                background: 'rgb(23 23 23)',
+                borderColor: 'rgb(38 38 38)',
+              }),
+              option: (base, { isFocused, isSelected }) => ({
+                ...base,
+                backgroundColor: isFocused
+                  ? 'rgb(38 38 38)'
+                  : isSelected
+                    ? 'rgb(64 64 64)'
+                    : undefined,
+                color: 'rgb(229 229 229)',
+              }),
+            }}
+          />
+          <div className={cn(
+            "px-4 py-2 rounded-lg border text-sm whitespace-nowrap",
+            connected
+              ? "border-blue-900/50 bg-blue-950/20 text-blue-400"
+              : "border-neutral-800 bg-neutral-900 text-neutral-400"
+          )}>
+            {connected ? '🟢 Connected' : '⚫ Disconnected'}
+          </div>
+        </div>
+
+        {/* Logger */}
+        <div className="flex-1 overflow-y-auto p-6" ref={loggerRef}>
+          <Logger filter={(selectedOption?.value as LoggerFilterType) || 'none'} />
+        </div>
+
+        {/* Input Area */}
+        <div className={cn(
+          "p-6 border-t border-neutral-800",
+          !connected && "opacity-50 pointer-events-none"
+        )}>
+          <div className="relative">
+            <textarea
+              className="w-full h-[120px] bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-neutral-200 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              ref={inputRef}
+              placeholder="Type something..."
+              value={textInput}
+              onChange={(e) => setTextInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSubmit();
+                }
+              }}
+            />
+            <button
+              className="absolute bottom-4 right-4 p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+              onClick={handleSubmit}
+            >
+              <span className="material-symbols-outlined">send</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>

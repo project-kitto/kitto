@@ -8,6 +8,10 @@ import { useScreenCapture } from '@hooks/use-screen-capture';
 import { useWebcam } from '@hooks/use-webcam';
 import { AudioRecorder } from '@lib/audio-recorder';
 import { ReactNode, RefObject, memo, useEffect, useRef, useState } from 'react';
+import { IoImageOutline } from "react-icons/io5";
+import { MdOutlineScreenShare } from "react-icons/md";
+import { FaMicrophone, FaMicrophoneSlash } from "react-icons/fa";
+import { VscDebugStart, VscDebugPause } from "react-icons/vsc";
 
 export type ControlTrayProps = {
   videoRef: RefObject<HTMLVideoElement | null>;
@@ -18,8 +22,8 @@ export type ControlTrayProps = {
 
 type MediaStreamButtonProps = {
   isStreaming: boolean;
-  onIcon: string;
-  offIcon: string;
+  onIcon: ReactNode;
+  offIcon: ReactNode;
   start: () => Promise<any>;
   stop: () => any;
 };
@@ -30,12 +34,18 @@ type MediaStreamButtonProps = {
 const MediaStreamButton = memo(
   ({ isStreaming, onIcon, offIcon, start, stop }: MediaStreamButtonProps) =>
     isStreaming ? (
-      <button className="action-button" onClick={stop}>
-        <span className="material-symbols-outlined">{onIcon}</span>
+      <button
+        className="flex items-center justify-center w-12 h-12 rounded-xl bg-neutral-800 text-neutral-400 hover:bg-neutral-700 transition-colors"
+        onClick={stop}
+      >
+        {onIcon}
       </button>
     ) : (
-      <button className="action-button" onClick={start}>
-        <span className="material-symbols-outlined">{offIcon}</span>
+        <button
+          className="flex items-center justify-center w-12 h-12 rounded-xl bg-neutral-800 text-neutral-400 hover:bg-neutral-700 transition-colors"
+          onClick={start}
+        >
+          {offIcon}
       </button>
     )
 );
@@ -143,21 +153,21 @@ function ControlTray({
   };
 
   return (
-    <section className="control-tray">
-      <canvas style={{ display: 'none' }} ref={renderCanvasRef} />
-      <nav className={cn('actions-nav', { disabled: !connected })}>
+    <div className="flex items-center justify-between gap-4">
+      <canvas className="hidden" ref={renderCanvasRef} />
+
+      <div className="flex items-center gap-2 p-2 bg-neutral-800/50 rounded-2xl">
         <button
-          className={cn('action-button mic-button')}
+          className={cn(
+            "w-12 h-12 rounded-xl flex items-center justify-center transition-colors",
+            !muted ? "bg-red-500 text-white" : "bg-neutral-700 text-neutral-400"
+          )}
           onClick={() => setMuted(!muted)}
         >
-          {!muted ? (
-            <span className="material-symbols-outlined filled">mic</span>
-          ) : (
-            <span className="material-symbols-outlined filled">mic_off</span>
-          )}
+          {!muted ? <FaMicrophone size={20} /> : <FaMicrophoneSlash size={20} />}
         </button>
 
-        <div className="action-button no-action outlined">
+        <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-neutral-800">
           <AudioPulse volume={volume} active={connected} hover={false} />
         </div>
 
@@ -167,38 +177,39 @@ function ControlTray({
               isStreaming={screenCapture.isStreaming}
               start={changeStreams(screenCapture)}
               stop={changeStreams()}
-              onIcon="cancel_presentation"
-              offIcon="present_to_all"
+              onIcon={<MdOutlineScreenShare size={20} />}
+              offIcon={<MdOutlineScreenShare size={20} />}
             />
             <MediaStreamButton
               isStreaming={webcam.isStreaming}
               start={changeStreams(webcam)}
               stop={changeStreams()}
-              onIcon="videocam_off"
-              offIcon="videocam"
+              onIcon={<IoImageOutline size={20} />}
+              offIcon={<IoImageOutline size={20} />}
             />
           </>
         )}
         {children}
-      </nav>
-
-      <div className={cn('connection-container', { connected })}>
-        <div className="connection-button-container">
-          <button
-            ref={connectButtonRef}
-            className={cn('action-button connect-toggle', {
-              connected,
-            })}
-            onClick={connected ? disconnect : connect}
-          >
-            <span className="material-symbols-outlined filled">
-              {connected ? 'pause' : 'play_arrow'}
-            </span>
-          </button>
-        </div>
-        <span className="text-indicator">Streaming</span>
       </div>
-    </section>
+
+      <div className="flex flex-col items-center gap-1">
+        <button
+          ref={connectButtonRef}
+          onClick={connected ? disconnect : connect}
+          className={cn(
+            "w-12 h-12 rounded-xl flex items-center justify-center",
+            connected
+              ? "bg-blue-500 text-white"
+              : "bg-neutral-700 text-neutral-400"
+          )}
+        >
+          {connected ? <VscDebugPause size={20} /> : <VscDebugStart size={20} />}
+        </button>
+        <span className="text-xs text-neutral-400">
+          {connected ? "Connected" : "Connect"}
+        </span>
+      </div>
+    </div>
   );
 }
 

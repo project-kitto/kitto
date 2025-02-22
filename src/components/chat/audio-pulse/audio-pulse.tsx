@@ -31,18 +31,27 @@ export default function AudioPulse({ active, volume, hover }: AudioPulseProps) {
   }, [volume]);
 
   return (
-    <div className={cn('audioPulse', { active, hover })}>
-      {Array(lineCount)
-        .fill(null)
-        .map((_, i) => (
-          <div
-            key={i}
-            ref={(el) => {
-              lines.current[i] = el!;
-            }}
-            style={{ animationDelay: `${i * 133}ms` }}
-          />
-        ))}
+    <div className={cn(
+      "flex w-6 justify-evenly items-center transition-opacity duration-300",
+      active ? "opacity-100" : "opacity-50"
+    )}>
+      {Array(lineCount).fill(null).map((_, i) => (
+        <div
+          key={i}
+          ref={(el) => {
+            lines.current[i] = el!;
+          }}
+          className={cn(
+            "w-1 min-h-1 rounded-full transition-all duration-100",
+            active ? "bg-neutral-200" : "bg-neutral-600",
+            hover && "animate-bounce"
+          )}
+          style={{
+            animationDelay: `${i * 133}ms`,
+            height: "4px" // Initial height
+          }}
+        />
+      ))}
     </div>
   );
 }
