@@ -3,15 +3,10 @@ import { createClient } from '@/config/supabase/server';
 import { LogIn } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { checkAuthentication } from '@/utils/authUtil';
 
 export default async function Home() {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (user) redirect('/dashboard');
+  if ((await checkAuthentication()).user) redirect('/dashboard');
 
   return (
     <div className="grid min-h-screen grid-rows-[20px_1fr_20px] items-center justify-items-center gap-16 p-8 pb-20 font-[family-name:var(--font-geist-sans)] sm:p-20">
